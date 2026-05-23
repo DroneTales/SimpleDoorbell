@@ -107,35 +107,47 @@ struct DoorbellSwitch : Service::Switch
 
 void IRAM_ATTR RingInterrupt()
 {
+    // The previous level state. True if the previous level was HIGH. False - if LOW.
     static bool WasHigh = false;
+    // Last time when level changed from LOW to HIGH.
     static uint32_t LastMillis = 0;
 
+    // Exit immediately if the ringing flag was already set.
     if (IsRinging)
         return;
 
     // Read the ring signal pin.
-    uint32_t Level = digitalRead(BELL_BUTTON_PIN);
-    // If it is rased from LOW to HIGH...
-    if (Level == HIGH && !WasHigh)
+    bool NowHigh = (digitalRead(BELL_BUTTON_PIN) == HIGH);
+    // If current level is HIGH...
+    if (NowHigh)
     {
-        // ...then set flag and store the time when the event appeared.
+        // ...and if it was HIGH (what should nebver happen, but who knows)...
+        if (WasHigh)
+            // ...exit from interrupt.
+            return;
+        
+        // We are here only if level changed from LOW to HIGH.
+        // Set previous state to the current one (HIGH).
         WasHigh = true;
+        // Remember time when level changed to high.
         LastMillis = millis();
         // Exit from ISR as we need to wait when it downs from HIGH to LOW.
         return;
     }
 
-    // If the current level is LOW but was HIGH (FALING edge detected).
-    if (Level == LOW && WasHigh)
-    {
-        // Reset the previous state to normal (LOW).
-        WasHigh = false;
-
-        // Now calculate the pulse duration and if it looks like bell signal
-        // duration set the ringing flag.
-        uint32_t CurrentMillis = millis(); // We need this to be able to use unsigned values.
-        IsRinging = ((CurrentMillis - LastMillis >= BELL_BUTTON_SIGNAL_DURATION));
-    }
+    // We are here only if the current level is LOW.
+    // If it was not HIGH (what should never happen, but show knows)...
+    if (!WasHigh)
+        // ...exit from the interrupt.
+    
+    // Ok, the level changed from HIGH to LOW. Reset the previous state to
+    // the current one (LOW).
+    WasHigh = false;
+    // Now calculate the pulse duration and if it looks like bell signal
+    // duration set the ringing flag.
+    uint32_t CurrentMillis = millis(); // We need this to be able to use unsigned values.
+    // Set ringing flag if pulse duration is correct.
+    IsRinging = ((CurrentMillis - LastMillis >= BELL_BUTTON_SIGNAL_DURATION));
 }
 
 /**************************************************************************************/
