@@ -49,11 +49,10 @@ constexpr uint32_t BELL_SIGNAL_DURATION = 250;
 /**************************************************************************************/
 /*                                  Global variables                                  */
 
-// The doorbell state. True if the doorbell is enabled and should play a sound.
-// False if the doorbell is disabled and should not play any sound. By default
-// the doorbell sound is enabled.
+// The doorbell sound enabling flag. True if the doorbell sound is enabled. False if
+// the doorbell sound is disabled.
 bool SoundEnabled = true;
-// Indicates when the ring button was pressed.
+// The doorbell ringing state. True if the ring signal was received. False otherwise.
 volatile bool IsRinging = false;
 
 // The doorbell event object.
@@ -93,8 +92,8 @@ struct DoorbellSwitch : Service::Switch
     
     bool update()
     {
+        // Get the current switch state and store it in the global flag.
         SoundEnabled = Switch->getNewVal();
-
         return true;
     }
 };
@@ -141,7 +140,7 @@ void IRAM_ATTR RingInterrupt()
         // duration set the ringing flag.
         uint32_t CurrentMillis = millis(); // We need this to be able to use unsigned values.
         // Set ringing flag if pulse duration is correct.
-        IsRinging = ((CurrentMillis - LastMillis >= BELL_BUTTON_SIGNAL_DURATION));
+        IsRinging = ((CurrentMillis - LastMillis) >= BELL_BUTTON_SIGNAL_DURATION);
     }
 }
 
