@@ -224,10 +224,6 @@ void loop()
     // We need to copy the ring indicator. We need it because the IsRinging may change
     // right in the middle of the routine.
     bool RingDetected = IsRinging;
-    if (RingDetected)
-        // Reset it only if the ring was detected. Why? Because interrupt
-        // may happen right after flag copying and before the if statement.
-        IsRinging = false;
 
     // If ring was detected (interrupt happened) after those statements then it
     // will be processed on next iteration because the IsRinging flag will be set
@@ -241,13 +237,23 @@ void loop()
     // Now process the HomeSpan messages.
     homeSpan.poll();
 
-    // If bell is ringing and the bell sound is enabled.
-    if (RingDetected && SoundEnabled)
+    // If ring was not detected then we can exit. If the ringing flag was changed
+    // we find it on next iteration.
+    if (!RingDetected)
+        return;
+
+    // We are here only if ring was detected. So check the sound enabling flag
+    // and if set then play the sound.
+    if (SoundEnabled)
     {
         digitalWrite(BELL_SIGNAL_PIN, HIGH);
         delay(BELL_SIGNAL_DURATION);
         digitalWrite(BELL_SIGNAL_PIN, LOW);
     }
+
+    // Here we can reset the ringing flag. Doing it here prevents from
+    // multiple ring detection and makes it more stable.
+    IsRinging = false;
 }
 
 /**************************************************************************************/
