@@ -118,15 +118,11 @@ void IRAM_ATTR RingInterrupt()
 
     // Read the ring signal pin.
     bool NowHigh = (digitalRead(BELL_BUTTON_PIN) == HIGH);
-    // If current level is HIGH...
-    if (NowHigh)
+
+    // If the current level is HIGH and the previous was LOW
+    // (the level changed from LOW to HIGH)...
+    if (NowHigh && !WasHigh)
     {
-        // ...and if it was HIGH (what should nebver happen, but who knows)...
-        if (WasHigh)
-            // ...exit from interrupt.
-            return;
-        
-        // We are here only if level changed from LOW to HIGH.
         // Set previous state to the current one (HIGH).
         WasHigh = true;
         // Remember time when level changed to high.
@@ -135,19 +131,18 @@ void IRAM_ATTR RingInterrupt()
         return;
     }
 
-    // We are here only if the current level is LOW.
-    // If it was not HIGH (what should never happen, but show knows)...
-    if (!WasHigh)
-        // ...exit from the interrupt.
-    
-    // Ok, the level changed from HIGH to LOW. Reset the previous state to
-    // the current one (LOW).
-    WasHigh = false;
-    // Now calculate the pulse duration and if it looks like bell signal
-    // duration set the ringing flag.
-    uint32_t CurrentMillis = millis(); // We need this to be able to use unsigned values.
-    // Set ringing flag if pulse duration is correct.
-    IsRinging = ((CurrentMillis - LastMillis >= BELL_BUTTON_SIGNAL_DURATION));
+    // If the previous level was HIGH and the current is LOW
+    // (the level changed from HIGH to LOW)...
+    if (WasHigh && !NowHigh)
+    {
+        // Reset the previous state to the current one (LOW).
+        WasHigh = false;
+        // Now calculate the pulse duration and if it looks like bell signal
+        // duration set the ringing flag.
+        uint32_t CurrentMillis = millis(); // We need this to be able to use unsigned values.
+        // Set ringing flag if pulse duration is correct.
+        IsRinging = ((CurrentMillis - LastMillis >= BELL_BUTTON_SIGNAL_DURATION));
+    }
 }
 
 /**************************************************************************************/
