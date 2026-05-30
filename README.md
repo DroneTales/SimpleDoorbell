@@ -1,6 +1,6 @@
 # Smart doorbell for Apple Home
 
-In this repository you will find a firmware for smart RF doorbell for your Apple Home. Should you have any questions please do not hesitate to contact me at gully.horror0w@icloud.com.  
+In this repository, you will find firmware for a smart RF doorbell for your Apple Home. Should you have any questions, please do not hesitate to contact me at gully.horror0w@icloud.com.  
  
 **Required components**
 
@@ -31,7 +31,7 @@ In this repository you will find a firmware for smart RF doorbell for your Apple
 
 ## Support the author
 
-If you like what I am doing you can support me using one of the link below:
+If you like what I am doing, you can support me using one of the links below:  
 
 **BuyMeACoffee**: https://buymeacoffee.com/dronetales  
 **Boosty**: https://boosty.to/drone_tales/donate  
